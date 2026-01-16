@@ -5,3 +5,6 @@ logs/
 .DS_Store
 *.swp
 *.user
+models/*.onnx
+models/*.engine
+models/*.mnn
