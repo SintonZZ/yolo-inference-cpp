@@ -27,6 +27,43 @@ else()
     message(STATUS "MNN backend disabled.")
 endif()
 
+# 选项：是否启用 TensorRT 后端
+option(ENABLE_TENSORRT "Enable TensorRT backend support" OFF)
+
+if (ENABLE_TENSORRT)
+    # 查找 CUDA
+    find_package(CUDA REQUIRED)
+    include_directories(${CUDA_INCLUDE_DIRS})
+    
+    # 查找 TensorRT
+    # 优先查找环境变量 TRT_HOME 指定的路径
+    find_path(TENSORRT_INCLUDE_DIR NvInfer.h 
+        HINTS $ENV{TRT_HOME}/include 
+              /usr/include/x86_64-linux-gnu 
+              /usr/local/cuda/include)
+              
+    find_library(TENSORRT_LIB nvinfer 
+        HINTS $ENV{TRT_HOME}/lib 
+              /usr/lib/x86_64-linux-gnu 
+              /usr/local/cuda/lib64)
+              
+    find_library(TENSORRT_ONNX_PARSER_LIB nvonnxparser 
+        HINTS $ENV{TRT_HOME}/lib 
+              /usr/lib/x86_64-linux-gnu 
+              /usr/local/cuda/lib64)
+
+    if (TENSORRT_INCLUDE_DIR AND TENSORRT_LIB)
+        message(STATUS "Found TensorRT: ${TENSORRT_INCLUDE_DIR}")
+        include_directories(${TENSORRT_INCLUDE_DIR})
+        add_definitions(-DENABLE_TENSORRT)
+        list(APPEND BACKEND_SOURCES src/backends/YoloV8TensorRT.cpp)
+    else()
+        message(FATAL_ERROR "TensorRT requested (ENABLE_TENSORRT=ON) but not found.")
+    endif()
+else()
+    message(STATUS "TensorRT backend disabled.")
+endif()
+
 # 包含头文件目录
 include_directories(include)
 include_directories(3rdparty)
@@ -50,4 +87,8 @@ target_link_libraries(yolov8_app PRIVATE ${OpenCV_LIBS})
 
 if (ENABLE_MNN AND MNN_LIBS)
     target_link_libraries(yolov8_app PRIVATE ${MNN_LIBS})
+endif()
+
+if (ENABLE_TENSORRT AND TENSORRT_LIB)
+    target_link_libraries(yolov8_app PRIVATE ${TENSORRT_LIB} ${CUDA_LIBRARIES} ${TENSORRT_ONNX_PARSER_LIB})
 endif()

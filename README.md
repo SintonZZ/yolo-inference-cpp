@@ -1,13 +1,13 @@
 # YOLOv8 Inference C++ (Multi-Backend)
 
-这是一个基于 C++ 的高性能 YOLOv8 目标检测推理项目，支持多种推理后端（OpenCV DNN、MNN）。项目设计灵活，易于集成到工业级应用中。
+这是一个基于 C++ 的高性能 YOLOv8 目标检测推理项目，支持多种推理后端（OpenCV DNN、MNN、TensorRT）。项目设计灵活，易于集成到工业级应用中。
 
 ## ✨ 主要特性
 
 *   **多后端支持**: 
     *   **OpenCV DNN**: 默认后端，无额外依赖，开箱即用。
     *   **MNN**: 阿里巴巴开源的轻量级推理引擎，适合边缘设备部署 (需编译时开启)。
-    *   **TensorRT**: (开发中) 针对 NVIDIA GPU 的高性能推理。
+    *   **TensorRT**: 针对 NVIDIA GPU 的高性能推理 (需编译时开启)。
 *   **高性能**: 
     *   内存复用机制，减少推理过程中的内存分配。
     *   C++17 标准编写，利用现代 C++ 特性。
@@ -46,6 +46,7 @@
 *   **nlohmann_json**: 用于解析 JSON 配置
 *   **spdlog**: 用于日志记录 (通常包含在 3rdparty 或系统安装)
 *   **MNN** (可选): 如果需要 MNN 后端支持
+*   **CUDA & TensorRT** (可选): 如果需要 TensorRT 后端支持
 
 ## 🚀 构建指南
 
@@ -82,6 +83,26 @@ cd build
 cmake -DENABLE_MNN=ON ..
 make -j$(nproc)
 ```
+
+### 3. 启用 TensorRT 后端支持
+
+**前提: 已安装 CUDA, cuDNN 和 TensorRT**
+
+```bash
+mkdir build
+cd build
+cmake -DENABLE_TENSORRT=ON ..
+make -j$(nproc)
+```
+
+**注意**: TensorRT 后端需要加载 `.engine` (或 `.plan`) 文件。您可以使用 `trtexec` 工具将 ONNX 转换为 Engine 文件。
+
+```bash
+# 使用 trtexec 转换 (TensorRT 自带工具)
+/usr/src/tensorrt/bin/trtexec --onnx=yolov8n.onnx --saveEngine=yolov8n.engine
+```
+
+然后在 `config.json` 中设置 `"backend": "TENSORRT"` 和 `"model_path": "../models/yolov8n.engine"`。
 
 ## 🏃 使用方法
 
@@ -124,7 +145,7 @@ yolo export model=yolov8n.pt format=onnx opset=12
 ```json
 {
     "log_path": "../logs/app.log",      // 日志文件路径
-    "backend": "OPENCV",                // 后端选择: "OPENCV" 或 "MNN"
+    "backend": "OPENCV",                // 后端选择: "OPENCV", "MNN", "TENSORRT"
     "model_path": "../models/yolov8n.onnx", // 模型路径
     "score_threshold": 0.25,            // 置信度阈值
     "nms_threshold": 0.45,              // NMS 阈值
@@ -134,7 +155,7 @@ yolo export model=yolov8n.pt format=onnx opset=12
 }
 ```
 
-*   **切换后端**: 修改 `"backend"` 字段为 `"MNN"` 即可切换到 MNN 引擎（需确保编译时已开启 MNN 支持）。
+*   **切换后端**: 修改 `"backend"` 字段为 `"MNN"` 或 `"TENSORRT"` 即可切换引擎（需确保编译时已开启相应支持）。
 *   **日志**: 程序运行日志会同时输出到控制台和 `log_path` 指定的文件中（追加模式）。
 
 ## 📊 性能优化
@@ -144,4 +165,10 @@ yolo export model=yolov8n.pt format=onnx opset=12
 
 ## 🤝 贡献
 
-欢迎提交 Issue 和 Pull Request 来改进本项目，例如添加 TensorRT 后端支持或优化前处理逻辑。
+欢迎提交 Issue 和 Pull Request 来改进本项目，例如添加新的后端支持或优化前处理逻辑。
+
+## ✅ TODO List
+
+*   [ ] **多媒体支持**: 支持视频文件和 Webcam 实时推理输入。
+*   [ ] **并发优化**: 实现多线程推理管道，提高吞吐量。
+*   [ ] **INT8 量化**: 完善 TensorRT INT8 校准与推理流程。

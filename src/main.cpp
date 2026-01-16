@@ -123,18 +123,17 @@ int main(int argc, char** argv) {
     // 简单起见，我们在 json 里写文件名，然后在代码里拼接，或者在 json 里写相对路径 (相对于执行路径)
     // 这里的实现假设 json 里写的是相对于执行路径的路径。
     // 为了方便用户，如果 config.json 里写的是 "yolov8n.onnx"，我们假设它和 config.json 在同一目录
-    // 但 cv::FileStorage 不会自动处理这个。
     // 我们尝试加上 ../ 前缀如果文件不存在
-    {
-        std::ifstream f(config.modelPath);
-        if (!f.good()) {
-            std::string tryPath = "../" + config.modelPath;
-            std::ifstream f2(tryPath);
-            if (f2.good()) {
-                config.modelPath = tryPath;
-            }
-        }
-    }
+    // {
+    //     std::ifstream f(config.modelPath);
+    //     if (!f.good()) {
+    //         std::string tryPath = "../" + config.modelPath;
+    //         std::ifstream f2(tryPath);
+    //         if (f2.good()) {
+    //             config.modelPath = tryPath;
+    //         }
+    //     }
+    // }
 
     // 读取图片
     cv::Mat image = cv::imread(imagePath);

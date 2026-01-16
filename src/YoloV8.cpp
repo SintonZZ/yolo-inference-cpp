@@ -5,6 +5,10 @@
 #include "backends/YoloV8MNN.hpp"
 #endif
 
+#ifdef ENABLE_TENSORRT
+#include "backends/YoloV8TensorRT.hpp"
+#endif
+
 #include <iostream>
 #include "spdlog/spdlog.h"
 
@@ -13,9 +17,13 @@ std::unique_ptr<YoloV8> YoloV8::create(const YoloV8Config& config) {
         case InferenceBackendType::OPENCV:
             return std::make_unique<YoloV8OpenCV>(config);
         case InferenceBackendType::TENSORRT:
-            // return std::make_unique<YoloV8TensorRT>(config);
-            spdlog::warn("TensorRT backend not implemented yet, falling back to OpenCV.");
+#ifdef ENABLE_TENSORRT
+            return std::make_unique<YoloV8TensorRT>(config);
+#else
+            spdlog::error("TensorRT backend is not compiled. Please recompile with -DENABLE_TENSORRT=ON.");
+            spdlog::warn("Falling back to OpenCV backend.");
             return std::make_unique<YoloV8OpenCV>(config);
+#endif
         case InferenceBackendType::MNN:
 #ifdef ENABLE_MNN
             return std::make_unique<YoloV8MNN>(config);
