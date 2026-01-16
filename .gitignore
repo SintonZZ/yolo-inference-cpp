@@ -1,0 +1,7 @@
+build/
+logs/
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.user
