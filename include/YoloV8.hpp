@@ -35,7 +35,7 @@ class YoloV8 {
 public:
     virtual ~YoloV8() = default;
 
-    // 工厂方法
+    // 工厂方法：根据配置创建具体的推理后端实例
     static std::unique_ptr<YoloV8> create(const YoloV8Config& config);
 
     // 纯虚接口

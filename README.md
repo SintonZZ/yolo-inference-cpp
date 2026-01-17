@@ -131,13 +131,17 @@ yolo export model=yolov8n.pt format=onnx opset=12
 编译完成后，可执行文件位于 `build` 目录。
 
 ```bash
-# 用法: ./yolov8_app <图片路径> [配置文件路径]
+# 用法: ./yolov8_app <输入源> [配置文件路径]
 
-# 示例 1: 使用默认配置
+# 示例 1: 图片推理 (使用默认配置)
 ./yolov8_app ../assets/bus.jpg
 
-# 示例 2: 指定配置文件
-./yolov8_app ../assets/bus.jpg ../config/config.json
+# 示例 2: Webcam 实时推理 (使用默认配置)
+# 0 代表 /dev/video0，程序会自动开启多线程模式
+./yolov8_app 0
+
+# 示例 3: 指定配置文件
+./yolov8_app 0 ../config/config.json
 ```
 
 ### 3. 配置文件说明 (`config/config.json`)
@@ -165,8 +169,8 @@ yolo export model=yolov8n.pt format=onnx opset=12
 
 ## ✅ TODO List
 
-*   [ ] **多媒体支持**: 支持视频文件和 Webcam 实时推理输入。
-*   [ ] **并发优化**: 实现多线程推理管道，提高吞吐量。
+*   [x] **多媒体支持**: 支持视频文件和 Webcam 实时推理输入。
+*   [x] **并发优化**: 实现多线程推理管道，提高吞吐量。
 *   [ ] **INT8 量化**: 完善 TensorRT INT8 校准与推理流程。
 
 ## 🤝 贡献
